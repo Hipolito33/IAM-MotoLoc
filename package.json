@@ -1,0 +1,22 @@
+{
+  "name": "iam-motoloc",
+  "version": "1.0.0",
+  "description": "Sistema de Gestão de Locação de Motocicletas",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "crud",
+    "motorcycle",
+    "rental"
+  ],
+  "author": "Arthur Hipólito",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
