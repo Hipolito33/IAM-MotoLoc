@@ -15,7 +15,7 @@ const criarMoto = async (req, res) => {
             cilindrada
         } = req.body;
 
-        await prisma.moto.create({
+        const moto = await prisma.moto.create({
             data: {
                 marca,
                 modelo,
@@ -27,45 +27,59 @@ const criarMoto = async (req, res) => {
             }
         });
 
-        res.send("Moto criada com sucesso!");
+        res.status(201).json(moto); // informa ao cliente que um recurso foi criado com sucesso.
     } catch (error) {
         console.error(error);
-        res.send("Erro ao cadastrar a moto!");
+        res.status(500).json({
+            erro: "Erro ao criar moto!"
+        });
     }
 };
-
 
 const listarMotos = async (req, res) => {
     try {
         const motosListadas = await prisma.moto.findMany();
-        res.json(motosListadas);
+
+        res.status(200).json(motosListadas);
     } catch (error) {
         console.error(error);
-        res.send("Erro ao listar as motos!");
+
+        res.status(500).json({
+            erro: "Erro ao listar as motos!"
+        });
     }
 };
 
 const buscarMotoPorID = async (req, res) => {
     try {
         const { id } = req.params;
+
         const moto = await prisma.moto.findUnique({
             where: {
                 id: Number(id)
             }
         });
+
         if (!moto) {
-            return res.status(404).send("Moto não encontrada.")
+            return res.status(404).json({
+                erro: "Moto não encontrada!"
+            });
         }
-        res.json(moto);
+
+        res.status(200).json(moto);
     } catch (error) {
         console.error(error);
-        res.status(500).send("Erro ao buscar a moto.");
+
+        res.status(500).json({
+            erro: "Erro ao buscar a moto!"
+        });
     }
 };
 
 const atualizarMoto = async (req, res) => {
     try {
         const { id } = req.params;
+
         const {
             marca,
             modelo,
@@ -76,7 +90,7 @@ const atualizarMoto = async (req, res) => {
             cilindrada
         } = req.body;
 
-        await prisma.moto.update({
+        const moto = await prisma.moto.update({
             where: {
                 id: Number(id)
             },
@@ -90,30 +104,52 @@ const atualizarMoto = async (req, res) => {
                 cilindrada
             }
         });
-        res.send("Moto atualizada com sucesso!");
-    }
-    catch (error) {
 
-        console.error(error)
-        res.status(500).send("Erro ao atualizar a moto.");
+        res.status(200).json(moto);
+    } catch (error) {
+        console.error(error);
+
+        if (error.code === "P2025") {
+            return res.status(404).json({
+                erro: "Moto não encontrada!"
+            });
+        } else if (error.code === "P2002") {
+            return res.status(409).json({
+                erro: "Já existe uma moto com essa placa ou chassi."
+            });
+        } else {
+            return res.status(500).json({
+                erro: "Erro ao atualizar a moto."
+            });
+        }
     }
 };
 
-const deletarMoto = async (req,res) => {
-    try{
+const deletarMoto = async (req, res) => {
+    try {
         const { id } = req.params;
-        await prisma.moto.delete({
+
+        const moto = await prisma.moto.delete({
             where: {
                 id: Number(id)
-            }    
+            }
         });
-        res.json("Moto deletada com sucesso!");
 
-    } catch(error){
+        res.status(200).json(moto);
+    } catch (error) {
         console.error(error);
-        res.status(500).send("Erro ao deletar a moto.");
+
+        if (error.code === "P2025") {
+            return res.status(404).json({
+                erro: "Moto não encontrada!"
+            });
+        } else {
+            return res.status(500).json({
+                erro: "Erro ao deletar a moto."
+            });
+        }
     }
-}
+};
 
 module.exports = {
     criarMoto,
@@ -121,4 +157,4 @@ module.exports = {
     buscarMotoPorID,
     atualizarMoto,
     deletarMoto
-};  
+};
